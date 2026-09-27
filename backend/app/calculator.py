@@ -17,12 +17,14 @@ Core-1: Калькулятор объёмов кровли.
 которое нужно закрыть в день 2 на трёх реальных объектах.
 """
 import json
+import logging
 import math
 from dataclasses import dataclass, field
 from typing import List, Optional
 
 from . import config
 
+logger = logging.getLogger("smetabystro")
 
 @dataclass
 class VolumeLine:
@@ -51,6 +53,7 @@ def load_norms() -> dict:
     if _norms_cache is None:
         with open(config.ROOF_NORMS_PATH, "r", encoding="utf-8") as f:
             _norms_cache = json.load(f)
+    logger.debug("Нормативы загружены: %s", _norms_cache)
     return _norms_cache
 
 
@@ -70,8 +73,17 @@ def calculate_roof(
 ) -> CalculationResult:
     norms = load_norms()
 
-    material = norms["materials"].get(material_sku)
+    # Normalize SKU to reduce client/whitespace/case issues
+    sku_norm = material_sku.strip() if isinstance(material_sku, str) else material_sku
+    # Keep original for error message
+    material = norms["materials"].get(sku_norm)
     if material is None:
+        # Try case-insensitive match as a fallback
+        materials_map = {k.upper(): v for k, v in norms["materials"].items()}
+        material = materials_map.get(sku_norm.upper() if isinstance(sku_norm, str) else sku_norm)
+    if material is None:
+        available = ", ".join(sorted(norms["materials"].keys()))
+        logger.debug("Available norm SKUs: %s", available)
         raise CalculatorError(f"Материал с артикулом '{material_sku}' не найден в нормативах")
 
     slopes_area: List[float] = []
