@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вход — СметаБыстро</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container" style="padding-top: 60px;">
+  <div id="error-slot"></div>
+  <div class="card">
+    <h2>СметаБыстро</h2>
+    <p style="color:#666; font-size:14px;">
+      Демо-версия для пилота. Вход по номеру телефона без кода подтверждения —
+      это НЕ настоящая защита аккаунта, только идентификация бригады.
+    </p>
+    <label for="phone">Номер телефона</label>
+    <input id="phone" type="tel" placeholder="+79991234567" autocomplete="tel">
+    <button id="loginBtn">Войти</button>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  const errorSlot = document.getElementById("error-slot");
+  const phoneInput = document.getElementById("phone");
+  const loginBtn = document.getElementById("loginBtn");
+
+  // Восстановим последний введённый номер, если пользователь уже заходил
+  const lastPhone = loadDraft("last-phone");
+  if (lastPhone) phoneInput.value = lastPhone;
+
+  loginBtn.addEventListener("click", async () => {
+    const phone = phoneInput.value.trim();
+    errorSlot.innerHTML = "";
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Входим…";
+    try {
+      await api.post("/api/auth/login", { phone });
+      saveDraft("last-phone", phone);
+      window.location.href = "/work_type.html";
+    } catch (err) {
+      showError(errorSlot, err);
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Войти";
+    }
+  });
+</script>
+</body>
+</html>

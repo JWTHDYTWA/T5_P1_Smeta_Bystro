@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>История — СметаБыстро</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>История расчётов</h1>
+  <a href="/work_type.html">Назад</a>
+</header>
+<div class="container" style="padding-bottom: 70px;">
+  <div id="error-slot"></div>
+  <div id="list"></div>
+</div>
+
+<nav class="tabbar">
+  <a href="/work_type.html">Новый расчёт</a>
+  <a href="/history.html" class="active">История</a>
+</nav>
+
+<script src="/js/api.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  const errorSlot = document.getElementById("error-slot");
+  const list = document.getElementById("list");
+
+  async function load() {
+    list.innerHTML = `<div class="loading">Загрузка…</div>`;
+    try {
+      const items = await api.get("/api/history");
+      if (items.length === 0) {
+        list.innerHTML = `<div class="empty-state">Здесь появятся ваши расчёты</div>`;
+        return;
+      }
+      list.innerHTML = items.map(item => `
+        <a class="history-item" href="/history_detail.html?id=${item.id}">
+          <div class="hist-title">${escapeHtml(item.material_name)}</div>
+          <div class="hist-meta">
+            ${new Date(item.created_at).toLocaleDateString("ru-RU")} ·
+            ${formatMoney(item.total_cost)} ₽
+            ${item.has_documents ? "· документы готовы" : "· без документов"}
+          </div>
+        </a>`).join("");
+    } catch (err) {
+      list.innerHTML = "";
+      showError(errorSlot, err);
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>

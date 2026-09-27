@@ -1,0 +1,57 @@
+{
+  "_comment": "Нормативы для расчёта скатной кровли. Готовится практикующим кровельщиком (см. раздел 3.2 ТЗ). Значения ниже — примерные, для демонстрации MVP, требуют проверки на реальных объектах.",
+
+  "angle_limits": {
+    "min_deg": 0,
+    "max_deg": 60
+  },
+
+  "overlap": {
+    "_comment": "Коэффициент запаса на нахлёст и подрезку листового материала, зависит от угла ската",
+    "angle_threshold_deg": 30,
+    "coefficient_low_angle": 1.15,
+    "coefficient_high_angle": 1.20
+  },
+
+  "materials": {
+    "MC-SUPERMONTERREY-01": {
+      "name": "Металлочерепица Супермонтеррей",
+      "unit": "лист",
+      "sheet_area_m2": 1.98
+    },
+    "MC-MONTERREY-LITE-01": {
+      "name": "Металлочерепица Монтеррей Лайт",
+      "unit": "лист",
+      "sheet_area_m2": 1.68
+    }
+  },
+
+  "battens": {
+    "_comment": "Обрешётка считается всегда, отдельный SKU в запросе не требуется",
+    "sku": "BATTEN-GENERIC-01",
+    "name": "Обрешётка (доска)",
+    "unit": "пог. м",
+    "rate_per_m2": 2.2
+  },
+
+  "fasteners": {
+    "sku": "FIX-SCREW-01",
+    "name": "Кровельный саморез",
+    "unit": "шт",
+    "rate_per_m2": 8
+  },
+
+  "gutter": {
+    "sku": "GUTTER-90-01",
+    "name": "Водосточный жёлоб",
+    "unit": "пог. м",
+    "rate_per_eave_m": 1.0
+  },
+
+  "abutment_strip": {
+    "sku": "ABUT-STRIP-01",
+    "name": "Планка примыкания",
+    "unit": "пог. м",
+    "rate_per_abutment": 2.0
+  }
+}

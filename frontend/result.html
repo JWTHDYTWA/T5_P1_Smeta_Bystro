@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Результат — СметаБыстро</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>Результат расчёта</h1>
+  <a href="/measurements.html">Назад</a>
+</header>
+<div class="container">
+  <div id="error-slot"></div>
+  <div id="stale-slot"></div>
+
+  <div class="card">
+    <div class="total-line grand">
+      <span>Итого</span>
+      <span id="totalCost">—</span>
+    </div>
+    <div class="total-line"><span>Материалы</span><span id="materialsCost">—</span></div>
+    <div class="total-line"><span>Работы</span><span id="workCost">—</span></div>
+    <div class="total-line"><span>Площадь кровли с запасом</span><span id="totalArea">—</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Позиции</h2>
+    <table id="volumesTable">
+      <thead><tr><th>Материал</th><th class="num">Кол-во</th><th class="num">Сумма, ₽</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <button id="generateBtn">Сформировать документы</button>
+    <a class="btn btn-secondary" id="internalLink" style="display:none;">Скачать смету (для себя)</a>
+    <a class="btn btn-secondary" id="clientLink" style="display:none;">Скачать/отправить КП заказчику</a>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  const errorSlot = document.getElementById("error-slot");
+  const staleSlot = document.getElementById("stale-slot");
+  const result = loadDraft("last-result");
+  const request = loadDraft("last-request");
+
+  if (!result || !request) {
+    window.location.href = "/measurements.html";
+  } else {
+    document.getElementById("totalCost").textContent = formatMoney(result.total_cost) + " ₽";
+    document.getElementById("materialsCost").textContent = formatMoney(result.materials_cost) + " ₽";
+    document.getElementById("workCost").textContent = formatMoney(result.work_cost) + " ₽";
+    document.getElementById("totalArea").textContent = result.total_area_m2 + " м²";
+
+    const tbody = document.querySelector("#volumesTable tbody");
+    tbody.innerHTML = result.volumes.map(v => `
+      <tr>
+        <td>${escapeHtml(v.name)}${v.price_is_stale ? " ⚠" : ""}<br><span style="color:#999;font-size:11px;">${v.qty} ${escapeHtml(v.unit)}</span></td>
+        <td class="num">${v.qty}</td>
+        <td class="num">${formatMoney(v.sum)}</td>
+      </tr>`).join("");
+
+    if (result.price_is_stale) {
+      staleSlot.innerHTML = `<div class="banner-warn">⚠ Часть цен в базе устарела (старше 10 дней). Проверьте актуальность перед отправкой заказчику.</div>`;
+    }
+  }
+
+  const generateBtn = document.getElementById("generateBtn");
+  const internalLink = document.getElementById("internalLink");
+  const clientLink = document.getElementById("clientLink");
+
+  generateBtn.addEventListener("click", async () => {
+    errorSlot.innerHTML = "";
+    generateBtn.disabled = true;
+    generateBtn.textContent = "Формируем документы…";
+    try {
+      const resp = await api.post("/api/documents/generate", { calculate_request: request });
+      internalLink.href = resp.internal_pdf_url;
+      internalLink.target = "_blank";
+      internalLink.style.display = "block";
+      clientLink.href = resp.client_pdf_url;
+      clientLink.target = "_blank";
+      clientLink.style.display = "block";
+      generateBtn.style.display = "none";
+      clearDraft("last-request");
+      clearDraft("last-result");
+      clearDraft("measurements");
+    } catch (err) {
+      showError(errorSlot, err);
+      generateBtn.disabled = false;
+      generateBtn.textContent = "Повторить";
+    }
+  });
+</script>
+</body>
+</html>

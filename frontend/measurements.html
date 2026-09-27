@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Замеры — СметаБыстро</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>Скатная кровля</h1>
+  <a href="/work_type.html">Назад</a>
+</header>
+<div class="container">
+  <div id="error-slot"></div>
+
+  <div class="card">
+    <h2>Замеры ската</h2>
+    <p style="color:#666; font-size:13px; margin-top:-8px;">
+      Длина и ширина — горизонтальная проекция ската (план сверху), а не длина по уклону.
+    </p>
+    <div class="row2">
+      <div>
+        <label for="length_m">Длина, м</label>
+        <input id="length_m" type="number" step="0.01" min="0.01" inputmode="decimal">
+      </div>
+      <div>
+        <label for="width_m">Ширина, м</label>
+        <input id="width_m" type="number" step="0.01" min="0.01" inputmode="decimal">
+      </div>
+    </div>
+    <label for="angle_deg">Угол наклона, °</label>
+    <input id="angle_deg" type="number" step="1" min="0" max="60" inputmode="decimal">
+
+    <div class="row2">
+      <div>
+        <label for="eave_length_m">Длина карнизов, м</label>
+        <input id="eave_length_m" type="number" step="0.1" min="0" inputmode="decimal">
+      </div>
+      <div>
+        <label for="ridge_length_m">Длина коньков, м</label>
+        <input id="ridge_length_m" type="number" step="0.1" min="0" inputmode="decimal">
+      </div>
+    </div>
+    <label for="abutments_count">Число примыканий</label>
+    <input id="abutments_count" type="number" step="1" min="0" inputmode="numeric">
+  </div>
+
+  <div class="card">
+    <h2>Материал</h2>
+    <label for="supplier">Поставщик</label>
+    <select id="supplier">
+      <option value="supplier-a">Поставщик А</option>
+      <option value="supplier-b">Поставщик Б</option>
+    </select>
+    <label for="material_sku">Материал кровли</label>
+    <select id="material_sku"></select>
+  </div>
+
+  <div class="card">
+    <h2>Расценка на работы</h2>
+    <label for="work_price">Монтаж кровли, ₽ за м²</label>
+    <input id="work_price" type="number" step="1" min="0" inputmode="decimal">
+  </div>
+
+  <button id="calcBtn">Рассчитать</button>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  const REGION = "region-01"; // на пилоте один регион (раздел 2.1 границ данных)
+  const fields = ["length_m", "width_m", "angle_deg", "eave_length_m", "ridge_length_m", "abutments_count", "supplier", "work_price"];
+  const errorSlot = document.getElementById("error-slot");
+  const materialSelect = document.getElementById("material_sku");
+  const supplierSelect = document.getElementById("supplier");
+  const calcBtn = document.getElementById("calcBtn");
+
+  function collectDraft() {
+    const draft = {};
+    fields.forEach(id => draft[id] = document.getElementById(id).value);
+    return draft;
+  }
+
+  function restoreDraft() {
+    const draft = loadDraft("measurements");
+    if (!draft) return;
+    fields.forEach(id => { if (draft[id] !== undefined) document.getElementById(id).value = draft[id]; });
+  }
+
+  fields.forEach(id => {
+    document.getElementById(id).addEventListener("input", () => saveDraft("measurements", collectDraft()));
+    document.getElementById(id).addEventListener("change", () => saveDraft("measurements", collectDraft()));
+  });
+
+  async function loadMaterials() {
+    materialSelect.innerHTML = "<option>Загрузка…</option>";
+    try {
+      const materials = await api.get(`/api/materials?region=${REGION}&supplier=${supplierSelect.value}`);
+      materialSelect.innerHTML = materials.map(m =>
+        `<option value="${m.sku}">${escapeHtml(m.name)} — ${formatMoney(m.price)} ₽/${m.unit}${m.is_stale ? " ⚠ цена устарела" : ""}</option>`
+      ).join("");
+      const draft = loadDraft("measurements");
+      if (draft && draft.material_sku) materialSelect.value = draft.material_sku;
+    } catch (err) {
+      showError(errorSlot, err);
+    }
+  }
+
+  supplierSelect.addEventListener("change", loadMaterials);
+
+  restoreDraft();
+  loadMaterials();
+
+  calcBtn.addEventListener("click", async () => {
+    errorSlot.innerHTML = "";
+    const payload = {
+      roof_type: "pitched",
+      slopes: [{
+        length_m: parseFloat(document.getElementById("length_m").value),
+        width_m: parseFloat(document.getElementById("width_m").value),
+        angle_deg: parseFloat(document.getElementById("angle_deg").value),
+      }],
+      eave_length_m: parseFloat(document.getElementById("eave_length_m").value) || 0,
+      ridge_length_m: parseFloat(document.getElementById("ridge_length_m").value) || 0,
+      abutments_count: parseInt(document.getElementById("abutments_count").value) || 0,
+      material_sku: materialSelect.value,
+      accessories_sku: [],
+      region: REGION,
+      supplier: supplierSelect.value,
+      work_rates: [{ name: "Монтаж кровли", unit: "m2", price: parseFloat(document.getElementById("work_price").value) || 0 }],
+    };
+
+    calcBtn.disabled = true;
+    calcBtn.textContent = "Считаем…";
+    try {
+      const result = await api.post("/api/calculate", payload);
+      saveDraft("last-request", payload);
+      saveDraft("last-result", result);
+      window.location.href = "/result.html";
+    } catch (err) {
+      showError(errorSlot, err);
+    } finally {
+      calcBtn.disabled = false;
+      calcBtn.textContent = "Рассчитать";
+    }
+  });
+</script>
+</body>
+</html>

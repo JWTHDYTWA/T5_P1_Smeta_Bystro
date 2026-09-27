@@ -1,0 +1,22 @@
+# Удобный запуск: `docker compose up -d --build`
+#
+# Именованный том smetabystro_storage хранит db.sqlite3 и сгенерированные PDF
+# отдельно от контейнера — пересборка/удаление контейнера не стирает историю
+# расчётов (раздел 2.1 ТЗ, требование "Расчёты не удаляются").
+#
+# ВАЖНО: том — это не резервная копия. Ежедневную копию db.sqlite3 на внешний
+# диск/облако (раздел 2.1 ТЗ) всё равно нужно делать вручную, например:
+#   docker compose exec smetabystro cp /app/backend/storage/db.sqlite3 /app/backend/storage/backup-$(date +%F).sqlite3
+
+services:
+  smetabystro:
+    build: .
+    container_name: smetabystro
+    ports:
+      - "8000:8000"
+    volumes:
+      - smetabystro_storage:/app/backend/storage
+    restart: unless-stopped
+
+volumes:
+  smetabystro_storage:

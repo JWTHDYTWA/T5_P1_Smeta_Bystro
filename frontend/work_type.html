@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вид работ — СметаБыстро</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>СметаБыстро</h1>
+  <a href="#" id="logoutLink">Выйти</a>
+</header>
+<div class="container">
+  <h2>Выберите вид работ</h2>
+  <div class="card" style="text-align:center;">
+    <div style="font-size:40px;">🏠</div>
+    <div style="font-weight:600; margin-top:8px;">Скатная кровля</div>
+    <div style="color:#666; font-size:13px; margin-top:4px;">Металлочерепица и комплектующие</div>
+    <a class="btn" href="/measurements.html">Начать расчёт</a>
+  </div>
+  <div class="card" style="opacity:0.5;">
+    <div style="font-weight:600;">Другие виды работ</div>
+    <div style="color:#666; font-size:13px;">Появятся после пилота</div>
+  </div>
+</div>
+
+<nav class="tabbar">
+  <a href="/work_type.html" class="active">Новый расчёт</a>
+  <a href="/history.html">История</a>
+</nav>
+
+<script src="/js/api.js"></script>
+<script>
+  document.getElementById("logoutLink").addEventListener("click", async (e) => {
+    e.preventDefault();
+    await api.post("/api/auth/logout");
+    window.location.href = "/login.html";
+  });
+</script>
+</body>
+</html>

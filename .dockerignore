@@ -1,0 +1,6 @@
+**/__pycache__
+**/*.pyc
+backend/.venv
+backend/storage/db.sqlite3
+backend/storage/documents/*.pdf
+.git

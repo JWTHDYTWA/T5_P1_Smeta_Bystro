@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 2cm; }
+  body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 11pt; color: #1a1a1a; }
+  .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #2563eb; padding-bottom: 12px; margin-bottom: 20px; }
+  .logo { max-height: 60px; max-width: 160px; }
+  h1 { font-size: 18pt; color: #2563eb; margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  th, td { border: 1px solid #ccc; padding: 8px 10px; text-align: left; }
+  th { background: #eff6ff; }
+  .num { text-align: right; }
+  .totals { margin-top: 16px; width: 100%; }
+  .totals td { border: none; padding: 6px 10px; }
+  .totals .label { text-align: right; color: #444; font-size: 13pt; }
+  .totals .value { text-align: right; font-weight: bold; font-size: 15pt; width: 160px; color: #2563eb; }
+  .footer { margin-top: 40px; font-size: 9pt; color: #999; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>Коммерческое предложение</h1>
+      <div>№{{ calculation_id }} от {{ result.price_date }}</div>
+    </div>
+    {% if logo_path %}<img class="logo" src="{{ logo_path }}">{% endif %}
+  </div>
+
+  <p><strong>Исполнитель:</strong> {{ brand_name }}</p>
+
+  <table>
+    <tr><th>Позиция</th><th>Ед.</th><th class="num">Количество</th></tr>
+    {% for item in result.volumes %}
+    <tr>
+      <td>{{ item.name }}</td>
+      <td>{{ item.unit }}</td>
+      <td class="num">{{ item.qty }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td>Монтажные работы</td>
+      <td>—</td>
+      <td class="num">включено</td>
+    </tr>
+  </table>
+
+  <p>Общая площадь кровли: {{ result.total_area_m2 }} м²</p>
+
+  <table class="totals">
+    <tr><td class="label">Итоговая стоимость:</td><td class="value">{{ "%.2f"|format(result.total_cost) }} ₽</td></tr>
+  </table>
+
+  <div class="footer">Коммерческое предложение сформировано сервисом «СметаБыстро». Цены действительны в течение 10 дней с даты формирования.</div>
+</body>
+</html>

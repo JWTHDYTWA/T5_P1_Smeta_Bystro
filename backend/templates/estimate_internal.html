@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 2cm; }
+  body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 11pt; color: #1a1a1a; }
+  h1 { font-size: 16pt; margin-bottom: 0; }
+  .subtitle { color: #666; margin-top: 4px; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; font-size: 10pt; }
+  th { background: #f0f0f0; }
+  .num { text-align: right; }
+  .totals { margin-top: 12px; width: 100%; }
+  .totals td { border: none; padding: 4px 8px; }
+  .totals .label { text-align: right; color: #444; }
+  .totals .value { text-align: right; font-weight: bold; width: 140px; }
+  .totals .grand { font-size: 13pt; border-top: 2px solid #333; }
+  .stale-warning { color: #b45309; background: #fef3c7; padding: 6px 10px; margin-bottom: 12px; font-size: 10pt; }
+  .footer { margin-top: 30px; font-size: 8pt; color: #999; }
+</style>
+</head>
+<body>
+  <h1>Внутренняя смета №{{ calculation_id }}</h1>
+  <div class="subtitle">{{ brand_name }} · только для внутреннего использования (себестоимость и маржа)</div>
+
+  {% if result.price_is_stale %}
+  <div class="stale-warning">⚠ В расчёте использованы цены старше {{ 10 }} дней — проверьте актуальность перед отправкой заказчику.</div>
+  {% endif %}
+
+  <table>
+    <tr><th>Материал / позиция</th><th>Ед.</th><th class="num">Кол-во</th><th class="num">Цена, ₽</th><th class="num">Сумма, ₽</th></tr>
+    {% for item in result.volumes %}
+    <tr>
+      <td>{{ item.name }}{% if item.price_is_stale %} ⚠{% endif %}</td>
+      <td>{{ item.unit }}</td>
+      <td class="num">{{ item.qty }}</td>
+      <td class="num">{{ "%.2f"|format(item.unit_price) }}</td>
+      <td class="num">{{ "%.2f"|format(item.sum) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <table class="totals">
+    <tr><td class="label">Себестоимость материалов:</td><td class="value">{{ "%.2f"|format(result.materials_cost) }} ₽</td></tr>
+    <tr><td class="label">Стоимость работ (расценка подрядчика):</td><td class="value">{{ "%.2f"|format(result.work_cost) }} ₽</td></tr>
+    <tr class="grand"><td class="label">Итого себестоимость + работы:</td><td class="value">{{ "%.2f"|format(result.total_cost) }} ₽</td></tr>
+  </table>
+
+  <p>Общая площадь кровли с запасом: {{ result.total_area_m2 }} м²</p>
+  <p>Дата актуальности цен: {{ result.price_date }}</p>
+
+  <div class="footer">Документ сформирован автоматически сервисом «СметаБыстро». Не является документом для передачи заказчику.</div>
+</body>
+</html>

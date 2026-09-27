@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Расчёт — СметаБыстро</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>Расчёт из истории</h1>
+  <a href="/history.html">Назад</a>
+</header>
+<div class="container">
+  <div id="error-slot"></div>
+  <div id="content" class="loading">Загрузка…</div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  const errorSlot = document.getElementById("error-slot");
+  const content = document.getElementById("content");
+  const id = new URLSearchParams(window.location.search).get("id");
+
+  async function load() {
+    try {
+      const item = await api.get(`/api/history/${id}`);
+      const r = item.result;
+      let html = `
+        <div class="card">
+          <div class="total-line grand"><span>Итого</span><span>${formatMoney(r.total_cost)} ₽</span></div>
+          <div class="total-line"><span>Материалы</span><span>${formatMoney(r.materials_cost)} ₽</span></div>
+          <div class="total-line"><span>Работы</span><span>${formatMoney(r.work_cost)} ₽</span></div>
+          <div class="total-line"><span>Площадь</span><span>${r.total_area_m2} м²</span></div>
+          <div class="total-line"><span>Дата расчёта</span><span>${new Date(item.created_at).toLocaleString("ru-RU")}</span></div>
+        </div>
+        <div class="card">
+          <h2>Позиции</h2>
+          <table><tbody>
+            ${r.volumes.map(v => `<tr><td>${escapeHtml(v.name)}</td><td class="num">${v.qty} ${escapeHtml(v.unit)}</td><td class="num">${formatMoney(v.sum)} ₽</td></tr>`).join("")}
+          </tbody></table>
+        </div>
+        <div class="card">`;
+      if (item.internal_pdf_url) {
+        html += `<a class="btn btn-secondary" href="${item.internal_pdf_url}" target="_blank">Скачать смету</a>`;
+      }
+      if (item.client_pdf_url) {
+        html += `<a class="btn btn-secondary" href="${item.client_pdf_url}" target="_blank">Скачать КП</a>`;
+      }
+      if (!item.internal_pdf_url && !item.client_pdf_url) {
+        html += `<p style="color:#666;">Документы для этого расчёта ещё не были сформированы.</p>`;
+      }
+      html += `</div>`;
+      content.outerHTML = `<div id="content">${html}</div>`;
+    } catch (err) {
+      content.innerHTML = "";
+      showError(errorSlot, err);
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>

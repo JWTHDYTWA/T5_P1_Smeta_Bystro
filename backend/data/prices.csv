@@ -1,0 +1,12 @@
+region,supplier,sku,name,unit,price,updated_at
+region-01,supplier-a,MC-SUPERMONTERREY-01,Металлочерепица Супермонтеррей,лист,780,2026-09-20
+region-01,supplier-a,MC-MONTERREY-LITE-01,Металлочерепица Монтеррей Лайт,лист,690,2026-09-20
+region-01,supplier-a,BATTEN-GENERIC-01,Обрешётка (доска),пог. м,45,2026-09-20
+region-01,supplier-a,FIX-SCREW-01,Кровельный саморез,шт,3.5,2026-09-20
+region-01,supplier-a,GUTTER-90-01,Водосточный жёлоб,пог. м,320,2026-09-20
+region-01,supplier-a,ABUT-STRIP-01,Планка примыкания,пог. м,210,2026-09-20
+region-01,supplier-b,MC-SUPERMONTERREY-01,Металлочерепица Супермонтеррей,лист,810,2026-09-18
+region-01,supplier-b,BATTEN-GENERIC-01,Обрешётка (доска),пог. м,42,2026-09-18
+region-01,supplier-b,FIX-SCREW-01,Кровельный саморез,шт,3.2,2026-09-18
+region-01,supplier-b,GUTTER-90-01,Водосточный жёлоб,пог. м,300,2026-09-18
+region-01,supplier-b,ABUT-STRIP-01,Планка примыкания,пог. м,195,2026-09-18

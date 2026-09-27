@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>СметаБыстро</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="loading">Загрузка…</div>
+<script src="/js/api.js"></script>
+<script>
+  api.get("/api/auth/me")
+    .then(() => { window.location.href = "/work_type.html"; })
+    .catch(() => { window.location.href = "/login.html"; });
+</script>
+</body>
+</html>
