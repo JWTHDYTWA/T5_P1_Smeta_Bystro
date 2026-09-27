@@ -84,6 +84,16 @@ cloudflared tunnel --url http://localhost:8000
 Снимает проблему с нативными библиотеками WeasyPrint (Pango) на «голом»
 Windows — весь код и системные зависимости уже внутри образа.
 
+### Dockerhub
+
+Для быстрого деплоя образ опубликован в Dockerhub.
+Скачивание и запуск готового образа:
+```sh
+docker run -p 8000:8000 jwth32/smeta_bystro:v1
+```
+
+### Локальная сборка
+
 ```bash
 docker compose up -d --build
 ```
