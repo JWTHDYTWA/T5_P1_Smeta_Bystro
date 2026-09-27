@@ -89,7 +89,7 @@ Windows — весь код и системные зависимости уже 
 Для быстрого деплоя образ опубликован в Dockerhub.
 Скачивание и запуск готового образа:
 ```sh
-docker run -p 8000:8000 jwth32/smeta_bystro:v1
+docker run -p 8000:8000 -v smetabystro_storage:/app/backend/storage jwth32/smeta_bystro:v1
 ```
 
 ### Локальная сборка
